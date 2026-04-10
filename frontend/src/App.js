@@ -14,7 +14,7 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch('/api/data');
+      const res = await fetch('https://raw.githubusercontent.com/Tolloter/dividendos-opciones/main/data.json');
       const json = await res.json();
       setData(json);
     } catch (e) {
