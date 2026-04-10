@@ -8,7 +8,13 @@ from werkzeug.utils import secure_filename
 from scoring import process_files
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {
+    "origins": ["https://dividendos-opciones.vercel.app",
+                "https://dividendos-opciones-*.vercel.app",
+                "http://localhost:3000"],
+    "methods": ["GET", "POST", "OPTIONS"],
+    "allow_headers": ["Content-Type", "X-Admin-Key"]
+}})
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
