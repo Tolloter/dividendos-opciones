@@ -63,6 +63,18 @@ def health():
 
 @app.route('/api/upload', methods=['POST'])
 def upload_files():
+    @app.route('/api/upload-json', methods=['POST'])
+def upload_json():
+    admin_key = request.headers.get('X-Admin-Key', '')
+    if admin_key != os.environ.get('ADMIN_KEY', 'dividendos2026'):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        data = request.get_json()
+        global latest_data
+        latest_data = data
+        return jsonify({"success": True, "companies": len(data.get('companies', []))})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     """Admin endpoint to upload InvestingPro Excel files"""
     admin_key = request.headers.get('X-Admin-Key', '')
     if admin_key != os.environ.get('ADMIN_KEY', 'dividendos2026'):
