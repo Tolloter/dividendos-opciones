@@ -166,7 +166,10 @@ export default function Dashboard({ data, loading }) {
     else { setSortCol(col); setSortDir('desc'); }
   }
 
-  const visibleCols = COLUMN_GROUPS[colGroup] || [];
+  const groupCols = COLUMN_GROUPS[colGroup] || [];
+  const visibleCols = colGroup === 'Identificación'
+    ? groupCols
+    : ['ticker', ...groupCols.filter(c => c !== 'ticker')];
 
   // Sector data for charts
   const sectorData = useMemo(() => {
@@ -338,31 +341,44 @@ export default function Dashboard({ data, loading }) {
                 <table>
                   <thead>
                     <tr>
-                      {visibleCols.map(c => (
-                        <th key={c} colSpan={1} style={{textAlign:'center',padding:'4px 10px 0'}}>
-                          {COLUMN_GROUPS[colGroup].indexOf(c) === 0 ? colGroup : ''}
-                        </th>
-                      ))}
+                      {visibleCols.map((c) => {
+                        const isTickerFixed = colGroup !== 'Identificación' && c === 'ticker';
+                        const isFirstGroup = !isTickerFixed && groupCols.indexOf(c) === 0;
+                        return (
+                          <th key={c} colSpan={1} style={{textAlign:'center',padding:'4px 10px 0',position:isTickerFixed?'sticky':undefined,left:isTickerFixed?0:undefined,background:isTickerFixed?'var(--bg-card)':undefined,zIndex:isTickerFixed?3:undefined}}>
+                            {isFirstGroup ? colGroup : ''}
+                          </th>
+                        );
+                      })}
                     </tr>
                     <tr>
-                      {visibleCols.map(c => (
-                        <th key={c} onClick={()=>handleSort(c)} className={sortCol===c?'sorted':''}>
-                          {COL_LABELS[c]||c}
-                          <span className={`sort-icon ${sortCol===c?'active':''}`}>
-                            {sortCol===c ? (sortDir==='asc'?'↑':'↓') : '↕'}
-                          </span>
-                        </th>
-                      ))}
+                      {visibleCols.map(c => {
+                        const isTickerFixed = colGroup !== 'Identificación' && c === 'ticker';
+                        return (
+                          <th key={c} onClick={()=>handleSort(c)} className={sortCol===c?'sorted':''}
+                            style={{position:isTickerFixed?'sticky':undefined,left:isTickerFixed?0:undefined,background:isTickerFixed?'var(--bg-card)':undefined,zIndex:isTickerFixed?3:undefined,color:isTickerFixed?'var(--gold)':undefined}}>
+                            {COL_LABELS[c]||c}
+                            <span className={`sort-icon ${sortCol===c?'active':''}`}>
+                              {sortCol===c ? (sortDir==='asc'?'↑':'↓') : '↕'}
+                            </span>
+                          </th>
+                        );
+                      })}
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.map(company => (
                       <tr key={company.ticker}>
-                        {visibleCols.map(c => (
-                          <td key={c} className={c==='nombre'||c==='accion'?'primary':c==='ticker'?'mono primary':''}>
-                            <CellRenderer c={c} val={company[c]}/>
-                          </td>
-                        ))}
+                        {visibleCols.map(c => {
+                          const isTickerFixed = colGroup !== 'Identificación' && c === 'ticker';
+                          return (
+                            <td key={c}
+                              className={c==='nombre'||c==='accion'?'primary':c==='ticker'?'mono primary':''}
+                              style={{position:isTickerFixed?'sticky':undefined,left:isTickerFixed?0:undefined,background:isTickerFixed?'var(--bg-card)':undefined,zIndex:isTickerFixed?2:undefined,fontWeight:isTickerFixed?700:undefined,color:isTickerFixed?'var(--gold)':undefined,borderRight:isTickerFixed?'1px solid var(--border)':undefined}}>
+                              <CellRenderer c={c} val={company[c]}/>
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))}
                   </tbody>
