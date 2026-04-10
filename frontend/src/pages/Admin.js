@@ -34,12 +34,12 @@ export default function Admin({ onDataUpdated }) {
 
   function onDrop(e) {
     e.preventDefault(); setDragover(false);
-    const dropped = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.xlsx'));
+    const dropped = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.json'));
     setFiles(prev => [...prev, ...dropped]);
   }
 
   function onSelect(e) {
-    const selected = Array.from(e.target.files).filter(f => f.name.endsWith('.xlsx'));
+    const selected = Array.from(e.target.files).filter(f => f.name.endsWith('.json'));
     setFiles(prev => [...prev, ...selected]);
   }
 
@@ -52,13 +52,16 @@ export default function Admin({ onDataUpdated }) {
     if (!adminKey) { setMsg({type:'error',text:'Introduce la clave de administrador'}); return; }
     setLoading(true); setMsg(null);
     try {
-      const form = new FormData();
-      files.forEach(f => form.append('files', f));
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {'X-Admin-Key': adminKey},
-        body: form,
-      });
+    const fileText = await files[0].text();
+const jsonData = JSON.parse(fileText);
+const res = await fetch('/api/upload-json', {
+  method: 'POST',
+  headers: {
+    'X-Admin-Key': adminKey,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(jsonData),
+});
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Error al procesar');
       setMsg({type:'success', text:`✅ ${json.companies} empresas procesadas correctamente`});
